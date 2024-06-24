@@ -156,7 +156,7 @@ impl Basis {
     /// (implies +X is right).
     ///
     /// _Godot equivalent: `Basis.looking_at()`_
-    #[cfg(since_api = "4.1")]
+    #[cfg(since_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.1")))]
     pub fn new_looking_at(target: Vector3, up: Vector3, use_model_front: bool) -> Self {
         super::inner::InnerBasis::looking_at(target, up, use_model_front)
     }
@@ -540,7 +540,7 @@ impl GlamType for RMat3 {
     }
 }
 
-#[cfg(not(feature = "double-precision"))]
+#[cfg(not(feature = "double-precision"))] #[cfg_attr(published_docs, doc(cfg(not(feature = "double-precision"))))]
 impl GlamType for glam::Mat3A {
     type Mapped = Basis;
 
@@ -604,7 +604,7 @@ unsafe impl GodotFfi for Basis {
 
 crate::meta::impl_godot_as_self!(Basis);
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod test {
     use crate::builtin::real_consts::{FRAC_PI_2, PI};
 
@@ -835,7 +835,7 @@ mod test {
         );
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde")] #[cfg_attr(published_docs, doc(cfg(feature = "serde")))]
     #[test]
     fn serde_roundtrip() {
         let basis = Basis::IDENTITY;

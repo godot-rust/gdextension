@@ -728,7 +728,7 @@ impl_packed_array!(
     },
 );
 
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 impl_packed_array!(
     type_name: PackedVector4Array,
     variant_type: PACKED_VECTOR4_ARRAY,

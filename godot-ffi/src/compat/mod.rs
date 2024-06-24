@@ -7,14 +7,14 @@
 
 use crate as sys;
 
-#[cfg(since_api = "4.1")]
+#[cfg(since_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.1")))]
 mod compat_4_1plus;
-#[cfg(since_api = "4.1")]
+#[cfg(since_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.1")))]
 pub use compat_4_1plus::*;
 
-#[cfg(before_api = "4.1")]
+#[cfg(before_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.1")))]
 mod compat_4_0;
-#[cfg(before_api = "4.1")]
+#[cfg(before_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.1")))]
 pub use compat_4_0::*;
 
 /// Dispatch at runtime between Godot 4.0 legacy and 4.1+ APIs.

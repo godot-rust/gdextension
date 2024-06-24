@@ -135,7 +135,7 @@ impl GString {
     }
 
     /// Gets the internal chars slice from a [`GString`].
-    #[cfg(since_api = "4.1")]
+    #[cfg(since_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.1")))]
     pub fn chars(&self) -> &[char] {
         // SAFETY: Godot 4.1 ensures valid UTF-32, making this safe to call.
         #[allow(deprecated)]
@@ -368,7 +368,7 @@ impl From<NodePath> for GString {
     }
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde")] #[cfg_attr(published_docs, doc(cfg(feature = "serde")))]
 mod serialize {
     use super::*;
     use serde::de::{Error, Visitor};

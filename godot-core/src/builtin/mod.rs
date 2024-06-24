@@ -186,7 +186,7 @@ impl Side {
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // #[test] utils for serde
 
-#[cfg(all(test, feature = "serde"))]
+#[cfg(all(test, feature = "serde"))] #[cfg_attr(published_docs, doc(cfg(all(test, feature = "serde"))))]
 pub(crate) mod test_utils {
     use serde::{Deserialize, Serialize};
 

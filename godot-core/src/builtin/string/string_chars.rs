@@ -5,11 +5,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(target_arch = "aarch64")] #[cfg_attr(published_docs, doc(cfg(target_arch = "aarch64")))]
 use std::arch::aarch64::*;
-#[cfg(target_arch = "x86")]
+#[cfg(target_arch = "x86")] #[cfg_attr(published_docs, doc(cfg(target_arch = "x86")))]
 use std::arch::x86::*;
-#[cfg(target_arch = "x86_64")]
+#[cfg(target_arch = "x86_64")] #[cfg_attr(published_docs, doc(cfg(target_arch = "x86_64")))]
 use std::arch::x86_64::*;
 
 /// Validates is a [`u32`] slice contains only valid [unicode scalar values](https://www.unicode.org/glossary/#unicode_scalar_value)
@@ -18,7 +18,7 @@ pub fn validate_unicode_scalar_sequence(seq: &[u32]) -> Option<&[char]> {
         let mut ptr = seq.as_ptr();
         let ptr_end = seq.as_ptr().add(seq.len());
 
-        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))]
+        #[cfg(any(target_arch = "x86_64", target_arch = "x86"))] #[cfg_attr(published_docs, doc(cfg(any(target_arch = "x86_64", target_arch = "x86"))))]
         loop {
             let ptr_next = ptr.add(4);
             if ptr_next > ptr_end {
@@ -48,7 +48,7 @@ pub fn validate_unicode_scalar_sequence(seq: &[u32]) -> Option<&[char]> {
             ptr = ptr_next;
         }
 
-        #[cfg(target_arch = "aarch64")]
+        #[cfg(target_arch = "aarch64")] #[cfg_attr(published_docs, doc(cfg(target_arch = "aarch64")))]
         loop {
             let ptr_next = ptr.add(4);
             if ptr_next > ptr_end {
@@ -88,7 +88,7 @@ pub fn validate_unicode_scalar_sequence(seq: &[u32]) -> Option<&[char]> {
     }
 }
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod tests {
     // simple random pseudorandom number generator using the linear congruential method
     struct Rand {

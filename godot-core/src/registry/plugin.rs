@@ -135,14 +135,14 @@ pub enum PluginItem {
         >,
 
         /// User-defined `on_notification` function.
-        #[cfg(before_api = "4.2")]
+        #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
         user_on_notification_fn: Option<
             unsafe extern "C" fn(
                 p_instance: sys::GDExtensionClassInstancePtr, //
                 p_what: i32,
             ),
         >,
-        #[cfg(since_api = "4.2")]
+        #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
         user_on_notification_fn: Option<
             unsafe extern "C" fn(
                 p_instance: sys::GDExtensionClassInstancePtr, //
@@ -183,14 +183,14 @@ pub enum PluginItem {
 
         // We do not support using this in Godot < 4.3, however it's easier to leave this in and fail elsewhere when attempting to use
         // this in Godot < 4.3.
-        #[cfg(before_api = "4.3")]
+        #[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
         user_free_property_list_fn: Option<
             unsafe extern "C" fn(
                 p_instance: sys::GDExtensionClassInstancePtr,
                 p_list: *const sys::GDExtensionPropertyInfo,
             ),
         >,
-        #[cfg(since_api = "4.3")]
+        #[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
         user_free_property_list_fn: Option<
             unsafe extern "C" fn(
                 p_instance: sys::GDExtensionClassInstancePtr,

@@ -18,10 +18,10 @@ pub use crate::obj::guards::{ScriptBaseMut, ScriptBaseRef};
 use std::ffi::c_void;
 use std::ops::{Deref, DerefMut};
 
-#[cfg(not(feature = "experimental-threads"))]
+#[cfg(not(feature = "experimental-threads"))] #[cfg_attr(published_docs, doc(cfg(not(feature = "experimental-threads"))))]
 use godot_cell::panicking::{GdCell, MutGuard, RefGuard};
 
-#[cfg(feature = "experimental-threads")]
+#[cfg(feature = "experimental-threads")] #[cfg_attr(published_docs, doc(cfg(feature = "experimental-threads")))]
 use godot_cell::blocking::{GdCell, MutGuard, RefGuard};
 
 use crate::builtin::{GString, StringName, Variant, VariantType};
@@ -162,9 +162,9 @@ pub trait ScriptInstance: Sized {
     fn property_set_fallback(this: SiMut<Self>, name: StringName, value: &Variant) -> bool;
 }
 
-#[cfg(before_api = "4.2")]
+#[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
 type ScriptInstanceInfo = sys::GDExtensionScriptInstanceInfo;
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 type ScriptInstanceInfo = sys::GDExtensionScriptInstanceInfo2;
 
 struct ScriptInstanceData<T: ScriptInstance> {
@@ -245,7 +245,7 @@ pub unsafe fn create_script_instance<T: ScriptInstance>(
         get_property_list_func: Some(script_instance_info::get_property_list_func::<T>),
         free_property_list_func: Some(script_instance_info::free_property_list_func::<T>),
 
-        #[cfg(since_api = "4.2")]
+        #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
         get_class_category_func: None, // not yet implemented.
 
         property_can_revert_func: None, // unimplemented until needed.
@@ -258,7 +258,7 @@ pub unsafe fn create_script_instance<T: ScriptInstance>(
         get_method_list_func: Some(script_instance_info::get_method_list_func::<T>),
         free_method_list_func: Some(script_instance_info::free_method_list_func::<T>),
         get_property_type_func: Some(script_instance_info::get_property_type_func::<T>),
-        #[cfg(since_api = "4.2")]
+        #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
         validate_property_func: None, // not yet implemented.
 
         has_method_func: Some(script_instance_info::has_method_func::<T>),
@@ -302,10 +302,10 @@ pub unsafe fn create_script_instance<T: ScriptInstance>(
     //
     // It is expected that the engine upholds the safety invariants stated on each of the GDEXtensionScriptInstanceInfo functions.
     unsafe {
-        #[cfg(before_api = "4.2")]
+        #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
         let create_fn = sys::interface_fn!(script_instance_create);
 
-        #[cfg(since_api = "4.2")]
+        #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
         let create_fn = sys::interface_fn!(script_instance_create2);
 
         create_fn(

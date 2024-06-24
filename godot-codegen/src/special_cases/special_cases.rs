@@ -88,7 +88,7 @@ pub fn is_godot_type_deleted(godot_ty: &str) -> bool {
     // See e.g. https://github.com/GodotVR/godot-xr-tools/issues/479.
     // OpenXR is also not available on iOS: https://github.com/godotengine/godot/blob/13ba673c42951fd7cfa6fd8a7f25ede7e9ad92bb/modules/openxr/config.py#L2
     // Do not hardcode a list of OpenXR classes, as more may be added in future Godot versions; instead use prefix.
-    #[cfg(any(all(before_api = "4.2", target_os = "macos"), target_os = "ios"))]
+    #[cfg(any(all(before_api = "4.2", target_os = "macos"), target_os = "ios"))] #[cfg_attr(published_docs, doc(cfg(any(all(before_api = "4.2", target_os = "macos"), target_os = "ios"))))]
     if godot_ty.starts_with("OpenXR") {
         return true;
     }
@@ -96,7 +96,7 @@ pub fn is_godot_type_deleted(godot_ty: &str) -> bool {
     // ThemeDB was previously loaded lazily
     // in 4.2 it loads at the Scene level
     // see: https://github.com/godotengine/godot/pull/81305
-    #[cfg(before_api = "4.2")]
+    #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
     if godot_ty == "ThemeDB" {
         return true;
     }

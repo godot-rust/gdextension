@@ -33,7 +33,7 @@ pub const fn bool_to_sys(value: bool) -> sys::GDExtensionBool {
 pub const SYS_TRUE: sys::GDExtensionBool = bool_to_sys(true);
 pub const SYS_FALSE: sys::GDExtensionBool = bool_to_sys(false);
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod test {
     use crate::conv::{bool_to_sys, u32_to_usize, SYS_FALSE, SYS_TRUE};
 
