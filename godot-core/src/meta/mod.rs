@@ -33,7 +33,7 @@ use godot_ffi as sys;
 #[doc(hidden)]
 pub use signature::*;
 
-#[cfg(feature = "trace")]
+#[cfg(feature = "trace")] #[cfg_attr(published_docs, doc(cfg(feature = "trace")))]
 pub use signature::trace;
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------

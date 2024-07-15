@@ -31,7 +31,7 @@ pub fn make_imports() -> TokenStream {
     }
 }
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 pub fn make_string_name(identifier: &str) -> TokenStream {
     let lit = Literal::byte_string(format!("{identifier}\0").as_bytes());
     quote! {
@@ -44,7 +44,7 @@ pub fn make_string_name(identifier: &str) -> TokenStream {
     }
 }
 
-#[cfg(before_api = "4.2")]
+#[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
 pub fn make_string_name(identifier: &str) -> TokenStream {
     quote! {
         StringName::from(#identifier)

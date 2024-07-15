@@ -137,7 +137,7 @@ impl<T: GodotClass> RawGd<T> {
         U: GodotClass,
     {
         // Workaround for bug in Godot 4.0 that makes casts always succeed (https://github.com/godot-rust/gdext/issues/158).
-        // TODO once fixed in Godot, use #[cfg(before_api = "4.1")]
+        // TODO once fixed in Godot, use #[cfg(before_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.1")))]
         if !self.is_cast_valid::<U>() {
             return Err(self);
         }

@@ -150,7 +150,7 @@ impl Transform3D {
     /// points towards the `target` position.
     ///
     /// See [`Basis::new_looking_at()`] for more information.
-    #[cfg(before_api = "4.1")]
+    #[cfg(before_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.1")))]
     #[must_use]
     pub fn looking_at(&self, target: Vector3, up: Vector3) -> Self {
         Self {
@@ -159,7 +159,7 @@ impl Transform3D {
         }
     }
 
-    #[cfg(since_api = "4.1")]
+    #[cfg(since_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.1")))]
     #[must_use]
     pub fn looking_at(&self, target: Vector3, up: Vector3, use_model_front: bool) -> Self {
         Self {
@@ -396,7 +396,7 @@ unsafe impl GodotFfi for Transform3D {
 
 crate::meta::impl_godot_as_self!(Transform3D);
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod test {
     use super::*;
 
@@ -493,7 +493,7 @@ mod test {
         );
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde")] #[cfg_attr(published_docs, doc(cfg(feature = "serde")))]
     #[test]
     fn serde_roundtrip() {
         let transform = Transform3D::default();

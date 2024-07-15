@@ -239,7 +239,7 @@ impl Variant {
     ///
     /// For Godot 4.0, see [`GodotFfi::new_with_init`].
     /// For all other versions, see [`GodotFfi::new_with_uninit`].
-    #[cfg(before_api = "4.1")]
+    #[cfg(before_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.1")))]
     #[doc(hidden)]
     pub unsafe fn new_with_var_uninit_or_init(
         init_fn: impl FnOnce(sys::GDExtensionVariantPtr),
@@ -252,7 +252,7 @@ impl Variant {
     ///
     /// For Godot 4.0, see [`GodotFfi::new_with_init`].
     /// For all other versions, see [`GodotFfi::new_with_uninit`].
-    #[cfg(since_api = "4.1")]
+    #[cfg(since_api = "4.1")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.1")))]
     #[doc(hidden)]
     pub unsafe fn new_with_var_uninit_or_init(
         init_fn: impl FnOnce(sys::GDExtensionUninitializedVariantPtr),
