@@ -178,7 +178,7 @@ impl GlamType for RVec2 {
     }
 }
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod test {
     use crate::assert_eq_approx;
 
@@ -193,7 +193,7 @@ mod test {
         assert_eq_approx!(a.coord_max(b), Vector2::new(1.2, 5.6));
     }
 
-    #[cfg(feature = "serde")]
+    #[cfg(feature = "serde")] #[cfg_attr(published_docs, doc(cfg(feature = "serde")))]
     #[test]
     fn serde_roundtrip() {
         let vector = Vector2::default();

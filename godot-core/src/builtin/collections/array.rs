@@ -140,7 +140,7 @@ impl_builtin_froms!(VariantArray;
     PackedVector3Array => array_from_packed_vector3_array,
 );
 
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 impl_builtin_froms!(VariantArray;
     PackedVector4Array => array_from_packed_vector4_array,
 );
@@ -921,7 +921,7 @@ impl<T: ArrayElement> Var for Array<T> {
         *self = FromGodot::from_godot(value)
     }
 
-    #[cfg(since_api = "4.2")]
+    #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
     fn property_hint() -> PropertyHintInfo {
         if T::Ffi::variant_type() == VariantType::NIL {
             return PropertyHintInfo::with_hint_none("");
@@ -1234,7 +1234,7 @@ macro_rules! varray {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde")] #[cfg_attr(published_docs, doc(cfg(feature = "serde")))]
 mod serialize {
     use super::*;
     use serde::de::{SeqAccess, Visitor};

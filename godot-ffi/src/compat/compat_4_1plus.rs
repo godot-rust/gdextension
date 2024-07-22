@@ -23,10 +23,10 @@ pub type InitCompat = sys::GDExtensionInterfaceGetProcAddress;
 unsafe impl BindingCompat for sys::GDExtensionInterfaceGetProcAddress {
     // In WebAssembly, function references and data pointers live in different memory spaces, so trying to read the "memory"
     // at a function pointer (an index into a table) to heuristically determine which API we have (as is done below) won't work.
-    #[cfg(target_family = "wasm")]
+    #[cfg(target_family = "wasm")] #[cfg_attr(published_docs, doc(cfg(target_family = "wasm")))]
     fn ensure_static_runtime_compatibility(&self) {}
 
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(not(target_family = "wasm"))] #[cfg_attr(published_docs, doc(cfg(not(target_family = "wasm"))))]
     fn ensure_static_runtime_compatibility(&self) {
         // In Godot 4.0.x, before the new GetProcAddress mechanism, the init function looked as follows.
         // In place of the `get_proc_address` function pointer, the `p_interface` data pointer was passed.

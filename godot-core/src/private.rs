@@ -12,7 +12,7 @@ pub use crate::registry::plugin::{ClassPlugin, ErasedRegisterFn, PluginItem};
 pub use crate::storage::{as_storage, Storage};
 pub use sys::out;
 
-#[cfg(feature = "trace")]
+#[cfg(feature = "trace")] #[cfg_attr(published_docs, doc(cfg(feature = "trace")))]
 pub use crate::meta::trace;
 
 use crate::global::godot_error;
@@ -150,7 +150,7 @@ pub fn auto_init<T>(l: &mut crate::obj::OnReady<T>) {
     l.init_auto();
 }
 
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 pub unsafe fn has_virtual_script_method(
     object_ptr: sys::GDExtensionObjectPtr,
     method_sname: sys::GDExtensionConstStringNamePtr,
@@ -167,7 +167,7 @@ pub fn flush_stdout() {
 pub const fn is_editor_plugin<T: crate::obj::Inherits<crate::classes::EditorPlugin>>() {}
 
 // Starting from 4.3, Godot has "runtime classes"; this emulation is no longer needed.
-#[cfg(before_api = "4.3")]
+#[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
 pub fn is_class_inactive(is_tool: bool) -> bool {
     if is_tool {
         return false;
@@ -182,7 +182,7 @@ pub fn is_class_inactive(is_tool: bool) -> bool {
 }
 
 // Starting from 4.3, Godot has "runtime classes"; we only need to check whether editor is running.
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 pub fn is_class_runtime(is_tool: bool) -> bool {
     if is_tool {
         return false;
@@ -384,7 +384,7 @@ where
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod tests {
     use super::{CallError, CallErrors};
     use crate::meta::CallContext;

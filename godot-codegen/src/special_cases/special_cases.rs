@@ -93,7 +93,7 @@ pub fn is_godot_type_deleted(godot_ty: &str) -> bool {
         match target_os.as_deref() {
             Ok("ios") => return true,
             Ok("macos") => {
-                #[cfg(before_api = "4.2")]
+                #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
                 return true;
             }
             _ => {}
@@ -103,7 +103,7 @@ pub fn is_godot_type_deleted(godot_ty: &str) -> bool {
     // ThemeDB was previously loaded lazily
     // in 4.2 it loads at the Scene level
     // see: https://github.com/godotengine/godot/pull/81305
-    #[cfg(before_api = "4.2")]
+    #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
     if godot_ty == "ThemeDB" {
         return true;
     }
