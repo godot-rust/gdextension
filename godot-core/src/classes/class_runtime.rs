@@ -70,7 +70,7 @@ pub(crate) fn ensure_object_alive(
     );
 }
 
-#[cfg(debug_assertions)]
+#[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
 pub(crate) fn ensure_object_inherits(
     derived: ClassName,
     base: ClassName,
@@ -93,7 +93,7 @@ pub(crate) fn ensure_object_inherits(
 // Implementation of this file
 
 /// Checks if `derived` inherits from `base`, using a cache for _successful_ queries.
-#[cfg(debug_assertions)]
+#[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
 fn is_derived_base_cached(derived: ClassName, base: ClassName) -> bool {
     use std::collections::HashSet;
     use sys::Global;

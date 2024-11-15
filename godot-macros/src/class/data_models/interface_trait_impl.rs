@@ -42,9 +42,9 @@ pub fn transform_trait_impl(original_impl: venial::Impl) -> ParseResult<TokenStr
     let mut virtual_method_names = vec![];
 
     let prv = quote! { ::godot::private };
-    #[cfg(all(feature = "register-docs", since_api = "4.3"))]
+    #[cfg(all(feature = "register-docs", since_api = "4.3"))] #[cfg_attr(published_docs, doc(cfg(all(feature = "register-docs", since_api = "4.3"))))]
     let docs = crate::docs::make_virtual_impl_docs(&original_impl.body_items);
-    #[cfg(not(all(feature = "register-docs", since_api = "4.3")))]
+    #[cfg(not(all(feature = "register-docs", since_api = "4.3")))] #[cfg_attr(published_docs, doc(cfg(not(all(feature = "register-docs", since_api = "4.3")))))]
     let docs = quote! {};
     for item in original_impl.body_items.iter() {
         let method = if let venial::ImplMember::AssocFunction(f) = item {
@@ -150,7 +150,7 @@ pub fn transform_trait_impl(original_impl: venial::Impl) -> ParseResult<TokenStr
                         fn __godot_notification(&mut self, what: i32) {
                             use ::godot::obj::UserClass as _;
 
-                            #[cfg(before_api = "4.3")]
+                            #[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
                             if ::godot::private::is_class_inactive(Self::__config().is_tool) {
                                 return;
                             }
@@ -174,7 +174,7 @@ pub fn transform_trait_impl(original_impl: venial::Impl) -> ParseResult<TokenStr
                         fn __godot_get_property(&self, property: ::godot::builtin::StringName) -> Option<::godot::builtin::Variant> {
                             use ::godot::obj::UserClass as _;
 
-                            #[cfg(before_api = "4.3")]
+                            #[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
                             if ::godot::private::is_class_inactive(Self::__config().is_tool) {
                                 return None;
                             }
@@ -197,7 +197,7 @@ pub fn transform_trait_impl(original_impl: venial::Impl) -> ParseResult<TokenStr
                         fn __godot_set_property(&mut self, property: ::godot::builtin::StringName, value: ::godot::builtin::Variant) -> bool {
                             use ::godot::obj::UserClass as _;
 
-                            #[cfg(before_api = "4.3")]
+                            #[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
                             if ::godot::private::is_class_inactive(Self::__config().is_tool) {
                                 return false;
                             }
@@ -263,7 +263,7 @@ pub fn transform_trait_impl(original_impl: venial::Impl) -> ParseResult<TokenStr
                         fn __godot_property_get_revert(&self, property: StringName) -> Option<::godot::builtin::Variant> {
                             use ::godot::obj::UserClass as _;
 
-                            #[cfg(before_api = "4.3")]
+                            #[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
                             if ::godot::private::is_class_inactive(Self::__config().is_tool) {
                                 return None;
                             }

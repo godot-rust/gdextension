@@ -49,11 +49,11 @@ struct ClassRegistrationInfo {
     user_virtual_fn: sys::GDExtensionClassGetVirtual, // Option (set if there is a `#[godot_api] impl I*`)
 
     /// Godot low-level class creation parameters.
-    #[cfg(before_api = "4.2")]
+    #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
     godot_params: sys::GDExtensionClassCreationInfo,
-    #[cfg(all(since_api = "4.2", before_api = "4.3"))]
+    #[cfg(all(since_api = "4.2", before_api = "4.3"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.2", before_api = "4.3"))))]
     godot_params: sys::GDExtensionClassCreationInfo2,
-    #[cfg(since_api = "4.3")]
+    #[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
     godot_params: sys::GDExtensionClassCreationInfo3,
 
     #[allow(dead_code)] // Currently unused; may be useful for diagnostics in the future.
@@ -101,11 +101,11 @@ pub fn register_class<
     out!("Manually register class {}", std::any::type_name::<T>());
 
     // This works as long as fields are called the same. May still need individual #[cfg]s for newer fields.
-    #[cfg(before_api = "4.2")]
+    #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
     type CreationInfo = sys::GDExtensionClassCreationInfo;
-    #[cfg(all(since_api = "4.2", before_api = "4.3"))]
+    #[cfg(all(since_api = "4.2", before_api = "4.3"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.2", before_api = "4.3"))))]
     type CreationInfo = sys::GDExtensionClassCreationInfo2;
-    #[cfg(since_api = "4.3")]
+    #[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
     type CreationInfo = sys::GDExtensionClassCreationInfo3;
 
     let godot_params = CreationInfo {
@@ -200,7 +200,7 @@ pub fn unregister_classes(init_level: InitLevel) {
     }
 }
 
-#[cfg(feature = "codegen-full")]
+#[cfg(feature = "codegen-full")] #[cfg_attr(published_docs, doc(cfg(feature = "codegen-full")))]
 pub fn auto_register_rpcs<T: GodotClass>(object: &mut T) {
     // Find the element that matches our class, and call the closure if it exists.
     if let Some(InherentImpl {
@@ -243,7 +243,7 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
             is_editor_plugin,
             is_internal,
             is_instantiable,
-            #[cfg(all(since_api = "4.3", feature = "register-docs"))]
+            #[cfg(all(since_api = "4.3", feature = "register-docs"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.3", feature = "register-docs"))))]
                 docs: _,
         } => {
             c.parent_class_name = Some(base_class_name);
@@ -268,7 +268,7 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
             )
             .expect("duplicate: create_instance_func (def)");
 
-            #[cfg(before_api = "4.2")]
+            #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
             let _ = is_internal; // mark used
             #[cfg(since_api = "4.2")]
             {
@@ -281,10 +281,10 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
                 c.godot_params.is_exposed = sys::conv::bool_to_sys(!is_internal);
             }
 
-            #[cfg(before_api = "4.2")]
+            #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
             assert!(generated_recreate_fn.is_none()); // not used
 
-            #[cfg(before_api = "4.3")]
+            #[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
             let _ = is_tool; // mark used
             #[cfg(since_api = "4.3")]
             {
@@ -296,7 +296,7 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
         PluginItem::InherentImpl(InherentImpl {
             register_methods_constants_fn,
             register_rpcs_fn: _,
-            #[cfg(all(since_api = "4.3", feature = "register-docs"))]
+            #[cfg(all(since_api = "4.3", feature = "register-docs"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.3", feature = "register-docs"))))]
                 docs: _,
         }) => {
             c.register_methods_constants_fn = Some(register_methods_constants_fn);
@@ -315,7 +315,7 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
             user_free_property_list_fn,
             user_property_can_revert_fn,
             user_property_get_revert_fn,
-            #[cfg(all(since_api = "4.3", feature = "register-docs"))]
+            #[cfg(all(since_api = "4.3", feature = "register-docs"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.3", feature = "register-docs"))))]
                 virtual_method_docs: _,
         } => {
             c.user_register_fn = user_register_fn;
@@ -326,11 +326,11 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
             fill_into(&mut c.godot_params.create_instance_func, user_create_fn)
                 .expect("duplicate: create_instance_func (i)");
 
-            #[cfg(since_api = "4.2")]
+            #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
             fill_into(&mut c.godot_params.recreate_instance_func, user_recreate_fn)
                 .expect("duplicate: recreate_instance_func (i)");
 
-            #[cfg(before_api = "4.2")]
+            #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
             assert!(user_recreate_fn.is_none()); // not used
 
             c.godot_params.to_string_func = user_to_string_fn;
@@ -378,7 +378,7 @@ fn register_class_raw(mut info: ClassRegistrationInfo) {
     let registration_failed = unsafe {
         // Try to register class...
 
-        #[cfg(before_api = "4.2")]
+        #[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
         let _: () = interface_fn!(classdb_register_extension_class)(
             sys::get_library(),
             class_name.string_sys(),
@@ -386,7 +386,7 @@ fn register_class_raw(mut info: ClassRegistrationInfo) {
             ptr::addr_of!(info.godot_params),
         );
 
-        #[cfg(all(since_api = "4.2", before_api = "4.3"))]
+        #[cfg(all(since_api = "4.2", before_api = "4.3"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.2", before_api = "4.3"))))]
         let _: () = interface_fn!(classdb_register_extension_class2)(
             sys::get_library(),
             class_name.string_sys(),
@@ -394,7 +394,7 @@ fn register_class_raw(mut info: ClassRegistrationInfo) {
             ptr::addr_of!(info.godot_params),
         );
 
-        #[cfg(since_api = "4.3")]
+        #[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
         let _: () = interface_fn!(classdb_register_extension_class3)(
             sys::get_library(),
             class_name.string_sys(),
@@ -491,7 +491,7 @@ fn default_registration_info(class_name: ClassName) -> ClassRegistrationInfo {
     }
 }
 
-#[cfg(before_api = "4.2")]
+#[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
 fn default_creation_info() -> sys::GDExtensionClassCreationInfo {
     sys::GDExtensionClassCreationInfo {
         is_virtual: false as u8,
@@ -514,7 +514,7 @@ fn default_creation_info() -> sys::GDExtensionClassCreationInfo {
     }
 }
 
-#[cfg(all(since_api = "4.2", before_api = "4.3"))]
+#[cfg(all(since_api = "4.2", before_api = "4.3"))] #[cfg_attr(published_docs, doc(cfg(all(since_api = "4.2", before_api = "4.3"))))]
 fn default_creation_info() -> sys::GDExtensionClassCreationInfo2 {
     sys::GDExtensionClassCreationInfo2 {
         is_virtual: false as u8,
@@ -542,7 +542,7 @@ fn default_creation_info() -> sys::GDExtensionClassCreationInfo2 {
     }
 }
 
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 fn default_creation_info() -> sys::GDExtensionClassCreationInfo3 {
     sys::GDExtensionClassCreationInfo3 {
         is_virtual: false as u8,

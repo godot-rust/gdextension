@@ -57,7 +57,7 @@ pub trait VarcallSignatureTuple: PtrcallSignatureTuple {
     /// Outbound virtual call to a method overridden by a script attached to the object.
     ///
     /// Returns `None` if the script does not override the method.
-    #[cfg(since_api = "4.3")]
+    #[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
     unsafe fn out_script_virtual_call(
         // Separate parameters to reduce tokens in macro-generated API.
         class_name: &'static str,
@@ -173,7 +173,7 @@ macro_rules! impl_varcall_signature_for_tuple {
                 //$crate::out!("in_varcall: {call_ctx}");
                 CallError::check_arg_count(call_ctx, arg_count as usize, $PARAM_COUNT)?;
 
-                #[cfg(feature = "trace")]
+                #[cfg(feature = "trace")] #[cfg_attr(published_docs, doc(cfg(feature = "trace")))]
                 trace::push(true, false, &call_ctx);
 
                 let args = ($(
@@ -236,7 +236,7 @@ macro_rules! impl_varcall_signature_for_tuple {
                 })
             }
 
-            #[cfg(since_api = "4.3")]
+            #[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
             unsafe fn out_script_virtual_call(
                 // Separate parameters to reduce tokens in macro-generated API.
                 class_name: &'static str,
@@ -365,7 +365,7 @@ macro_rules! impl_ptrcall_signature_for_tuple {
             ) {
                 // $crate::out!("in_ptrcall: {call_ctx}");
 
-                #[cfg(feature = "trace")]
+                #[cfg(feature = "trace")] #[cfg_attr(published_docs, doc(cfg(feature = "trace")))]
                 trace::push(true, true, &call_ctx);
 
                 let args = ($(
@@ -662,7 +662,7 @@ impl<'a> fmt::Display for CallContext<'a> {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // Trace diagnostics for integration tests
-#[cfg(feature = "trace")]
+#[cfg(feature = "trace")] #[cfg_attr(published_docs, doc(cfg(feature = "trace")))]
 pub mod trace {
     use std::cell::Cell;
 

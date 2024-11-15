@@ -60,7 +60,7 @@ impl Callable {
         }
     }
 
-    #[cfg(since_api = "4.2")]
+    #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
     fn default_callable_custom_info() -> sys::GDExtensionCallableCustomInfo {
         sys::GDExtensionCallableCustomInfo {
             callable_userdata: ptr::null_mut(),
@@ -92,7 +92,7 @@ impl Callable {
     ///     Ok(sum.to_variant())
     /// });
     /// ```
-    #[cfg(since_api = "4.2")]
+    #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
     pub fn from_fn<F, S>(name: S, rust_function: F) -> Self
     where
         F: 'static + Send + Sync + FnMut(&[&Variant]) -> Result<Variant, ()>,
@@ -119,7 +119,7 @@ impl Callable {
     /// Create a highly configurable callable from Rust.
     ///
     /// See [`RustCallable`] for requirements on the type.
-    #[cfg(since_api = "4.2")]
+    #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
     pub fn from_custom<C: RustCallable>(callable: C) -> Self {
         // Could theoretically use `dyn` but would need:
         // - double boxing
@@ -139,7 +139,7 @@ impl Callable {
         Self::from_custom_info(info)
     }
 
-    #[cfg(since_api = "4.2")]
+    #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
     fn from_custom_info(mut info: sys::GDExtensionCallableCustomInfo) -> Callable {
         // SAFETY: callable_custom_create() is a valid way of creating callables.
         unsafe {
@@ -337,14 +337,14 @@ impl fmt::Display for Callable {
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // Callbacks for custom implementations
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 use custom_callable::*;
 
 use crate::meta;
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 pub use custom_callable::RustCallable;
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 mod custom_callable {
     use super::*;
     use crate::builtin::GString;

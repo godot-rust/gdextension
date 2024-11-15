@@ -11,7 +11,7 @@
 
 use std::cell::Cell;
 
-#[cfg(not(wasm_nothreads))]
+#[cfg(not(wasm_nothreads))] #[cfg_attr(published_docs, doc(cfg(not(wasm_nothreads))))]
 use std::thread::ThreadId;
 
 use super::GodotBinding;
@@ -20,11 +20,11 @@ use crate::ManualInitCell;
 pub(super) struct BindingStorage {
     // No threading when linking against Godot with a nothreads Wasm build.
     // Therefore, we just need to check if the bindings were initialized, as all accesses are from the main thread.
-    #[cfg(wasm_nothreads)]
+    #[cfg(wasm_nothreads)] #[cfg_attr(published_docs, doc(cfg(wasm_nothreads)))]
     initialized: Cell<bool>,
 
     // Is used in to check that we've been called from the right thread, so must be thread-safe to access.
-    #[cfg(not(wasm_nothreads))]
+    #[cfg(not(wasm_nothreads))] #[cfg_attr(published_docs, doc(cfg(not(wasm_nothreads))))]
     main_thread_id: Cell<Option<ThreadId>>,
     binding: ManualInitCell<GodotBinding>,
 }
@@ -38,10 +38,10 @@ impl BindingStorage {
     #[inline(always)]
     unsafe fn storage() -> &'static Self {
         static BINDING: BindingStorage = BindingStorage {
-            #[cfg(wasm_nothreads)]
+            #[cfg(wasm_nothreads)] #[cfg_attr(published_docs, doc(cfg(wasm_nothreads)))]
             initialized: Cell::new(false),
 
-            #[cfg(not(wasm_nothreads))]
+            #[cfg(not(wasm_nothreads))] #[cfg_attr(published_docs, doc(cfg(not(wasm_nothreads))))]
             main_thread_id: Cell::new(None),
             binding: ManualInitCell::new(),
         };
@@ -53,10 +53,10 @@ impl BindingStorage {
     ///
     /// It is recommended to use this function for that purpose as the field to check varies depending on the compilation target.
     fn initialized(&self) -> bool {
-        #[cfg(wasm_nothreads)]
+        #[cfg(wasm_nothreads)] #[cfg_attr(published_docs, doc(cfg(wasm_nothreads)))]
         return self.initialized.get();
 
-        #[cfg(not(wasm_nothreads))]
+        #[cfg(not(wasm_nothreads))] #[cfg_attr(published_docs, doc(cfg(not(wasm_nothreads))))]
         self.main_thread_id.get().is_some()
     }
 
@@ -81,7 +81,7 @@ impl BindingStorage {
         // 'std::thread::current()' fails when linking to a Godot web build without threads. When compiling to wasm-nothreads,
         // we assume it is impossible to have multi-threading, so checking if we are in the main thread is not needed.
         // Therefore, we don't store the thread ID, but rather just whether initialization already occurred.
-        #[cfg(wasm_nothreads)]
+        #[cfg(wasm_nothreads)] #[cfg_attr(published_docs, doc(cfg(wasm_nothreads)))]
         self.initialized.set(initialized);
 
         #[cfg(not(wasm_nothreads))]

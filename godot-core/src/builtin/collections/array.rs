@@ -146,7 +146,7 @@ impl_builtin_froms!(VariantArray;
     PackedVector3Array => array_from_packed_vector3_array,
 );
 
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 impl_builtin_froms!(VariantArray;
     PackedVector4Array => array_from_packed_vector4_array,
 );
@@ -771,7 +771,7 @@ impl<T: ArrayElement> Array<T> {
         std::mem::transmute::<&Array<T>, &Array<U>>(self)
     }
 
-    #[cfg(debug_assertions)]
+    #[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
     pub(crate) fn debug_validate_elements(&self) -> Result<(), ConvertError> {
         // SAFETY: every element is internally represented as Variant.
         let canonical_array = unsafe { self.assume_type_ref::<Variant>() };
@@ -793,7 +793,7 @@ impl<T: ArrayElement> Array<T> {
     }
 
     // No-op in Release. Avoids O(n) conversion checks, but still panics on access.
-    #[cfg(not(debug_assertions))]
+    #[cfg(not(debug_assertions))] #[cfg_attr(published_docs, doc(cfg(not(debug_assertions))))]
     pub(crate) fn debug_validate_elements(&self) -> Result<(), ConvertError> {
         Ok(())
     }
@@ -1121,7 +1121,7 @@ impl<T: ArrayElement> GodotType for Array<T> {
         "Array".to_string()
     }
 
-    #[cfg(since_api = "4.2")]
+    #[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
     fn property_hint_info() -> PropertyHintInfo {
         // Array<Variant>, aka untyped array, has no hints.
         if Self::has_variant_t() {
@@ -1373,7 +1373,7 @@ macro_rules! varray {
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "serde")] #[cfg_attr(published_docs, doc(cfg(feature = "serde")))]
 mod serialize {
     use super::*;
     use serde::de::{SeqAccess, Visitor};
