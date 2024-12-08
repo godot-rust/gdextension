@@ -1,3 +1,4 @@
+#![cfg_attr(published_docs, feature(doc_cfg))]
 /*
  * Copyright (c) godot-rust; Bromeon and contributors.
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -35,7 +36,7 @@ mod extras;
 mod global;
 mod godot_ffi;
 mod interface_init;
-#[cfg(target_os = "linux")]
+#[cfg(target_os = "linux")] #[cfg_attr(published_docs, doc(cfg(target_os = "linux")))]
 pub mod linux_reload_workaround;
 mod opaque;
 mod plugins;
@@ -48,7 +49,7 @@ mod toolbox;
 pub use paste;
 
 #[doc(hidden)]
-#[cfg(target_family = "wasm")]
+#[cfg(target_family = "wasm")] #[cfg_attr(published_docs, doc(cfg(target_family = "wasm")))]
 pub use gensym::gensym;
 
 pub use crate::godot_ffi::{GodotFfi, GodotNullableFfi, PrimitiveConversionError, PtrcallType};
@@ -286,9 +287,9 @@ pub unsafe fn load_class_method_table(api_level: InitLevel) {
         InitLevel::Servers => {
             // SAFETY: The interface has been initialized and this function hasn't been called before.
             unsafe {
-                #[cfg(feature = "codegen-lazy-fptrs")]
+                #[cfg(feature = "codegen-lazy-fptrs")] #[cfg_attr(published_docs, doc(cfg(feature = "codegen-lazy-fptrs")))]
                 initialize_class_server_method_table(ClassServersMethodTable::load());
-                #[cfg(not(feature = "codegen-lazy-fptrs"))]
+                #[cfg(not(feature = "codegen-lazy-fptrs"))] #[cfg_attr(published_docs, doc(cfg(not(feature = "codegen-lazy-fptrs"))))]
                 initialize_class_server_method_table(ClassServersMethodTable::load(
                     interface,
                     &mut string_names,
@@ -300,9 +301,9 @@ pub unsafe fn load_class_method_table(api_level: InitLevel) {
         InitLevel::Scene => {
             // SAFETY: The interface has been initialized and this function hasn't been called before.
             unsafe {
-                #[cfg(feature = "codegen-lazy-fptrs")]
+                #[cfg(feature = "codegen-lazy-fptrs")] #[cfg_attr(published_docs, doc(cfg(feature = "codegen-lazy-fptrs")))]
                 initialize_class_scene_method_table(ClassSceneMethodTable::load());
-                #[cfg(not(feature = "codegen-lazy-fptrs"))]
+                #[cfg(not(feature = "codegen-lazy-fptrs"))] #[cfg_attr(published_docs, doc(cfg(not(feature = "codegen-lazy-fptrs"))))]
                 initialize_class_scene_method_table(ClassSceneMethodTable::load(
                     interface,
                     &mut string_names,
@@ -314,9 +315,9 @@ pub unsafe fn load_class_method_table(api_level: InitLevel) {
         InitLevel::Editor => {
             // SAFETY: The interface has been initialized and this function hasn't been called before.
             unsafe {
-                #[cfg(feature = "codegen-lazy-fptrs")]
+                #[cfg(feature = "codegen-lazy-fptrs")] #[cfg_attr(published_docs, doc(cfg(feature = "codegen-lazy-fptrs")))]
                 initialize_class_editor_method_table(ClassEditorMethodTable::load());
-                #[cfg(not(feature = "codegen-lazy-fptrs"))]
+                #[cfg(not(feature = "codegen-lazy-fptrs"))] #[cfg_attr(published_docs, doc(cfg(not(feature = "codegen-lazy-fptrs"))))]
                 initialize_class_editor_method_table(ClassEditorMethodTable::load(
                     interface,
                     &mut string_names,

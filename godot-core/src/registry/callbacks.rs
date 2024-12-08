@@ -25,7 +25,7 @@ pub unsafe extern "C" fn create<T: cap::GodotDefault>(
     create_custom(T::__godot_user_init)
 }
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 pub unsafe extern "C" fn recreate<T: cap::GodotDefault>(
     _class_userdata: *mut std::ffi::c_void,
     object: sys::GDExtensionObjectPtr,
@@ -137,7 +137,7 @@ pub unsafe extern "C" fn to_string<T: cap::GodotToString>(
     string.move_into_string_ptr(out_string);
 }
 
-#[cfg(before_api = "4.2")]
+#[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
 pub unsafe extern "C" fn on_notification<T: cap::GodotNotification>(
     instance: sys::GDExtensionClassInstancePtr,
     what: i32,
@@ -148,7 +148,7 @@ pub unsafe extern "C" fn on_notification<T: cap::GodotNotification>(
     T::__godot_notification(&mut *instance, what);
 }
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 pub unsafe extern "C" fn on_notification<T: cap::GodotNotification>(
     instance: sys::GDExtensionClassInstancePtr,
     what: i32,
