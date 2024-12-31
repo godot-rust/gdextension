@@ -14,7 +14,7 @@ pub use crate::registry::plugin::{
 pub use crate::storage::{as_storage, Storage};
 pub use sys::out;
 
-#[cfg(feature = "trace")]
+#[cfg(feature = "trace")] #[cfg_attr(published_docs, doc(cfg(feature = "trace")))]
 pub use crate::meta::trace;
 
 use crate::global::godot_error;
@@ -22,7 +22,7 @@ use crate::meta::error::CallError;
 use crate::meta::CallContext;
 use crate::sys;
 use std::sync::atomic;
-#[cfg(debug_assertions)]
+#[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
 use std::sync::{Arc, Mutex};
 use sys::Global;
 
@@ -171,7 +171,7 @@ pub fn auto_init<T>(l: &mut crate::obj::OnReady<T>, base: &crate::obj::Gd<crate:
     l.init_auto(base);
 }
 
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 pub unsafe fn has_virtual_script_method(
     object_ptr: sys::GDExtensionObjectPtr,
     method_sname: sys::GDExtensionConstStringNamePtr,
@@ -188,7 +188,7 @@ pub fn flush_stdout() {
 pub const fn is_editor_plugin<T: crate::obj::Inherits<crate::classes::EditorPlugin>>() {}
 
 // Starting from 4.3, Godot has "runtime classes"; this emulation is no longer needed.
-#[cfg(before_api = "4.3")]
+#[cfg(before_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.3")))]
 pub fn is_class_inactive(is_tool: bool) -> bool {
     if is_tool {
         return false;
@@ -203,7 +203,7 @@ pub fn is_class_inactive(is_tool: bool) -> bool {
 }
 
 // Starting from 4.3, Godot has "runtime classes"; we only need to check whether editor is running.
-#[cfg(since_api = "4.3")]
+#[cfg(since_api = "4.3")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.3")))]
 pub fn is_class_runtime(is_tool: bool) -> bool {
     if is_tool {
         return false;
@@ -220,7 +220,7 @@ pub fn is_class_runtime(is_tool: bool) -> bool {
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 // Panic handling
 
-#[cfg(debug_assertions)]
+#[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
 #[derive(Debug)]
 struct GodotPanicInfo {
     line: u32,
@@ -349,11 +349,11 @@ where
     F: FnOnce() -> R + std::panic::UnwindSafe,
     S: std::fmt::Display,
 {
-    #[cfg(debug_assertions)]
+    #[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
     let info: Arc<Mutex<Option<GodotPanicInfo>>> = Arc::new(Mutex::new(None));
 
     // Back up previous hook, set new one.
-    #[cfg(debug_assertions)]
+    #[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
     let prev_hook = {
         let info = info.clone();
         let prev_hook = std::panic::take_hook();
@@ -377,7 +377,7 @@ where
     let panic = std::panic::catch_unwind(code);
 
     // Restore the previous panic hook if in Debug mode.
-    #[cfg(debug_assertions)]
+    #[cfg(debug_assertions)] #[cfg_attr(published_docs, doc(cfg(debug_assertions)))]
     std::panic::set_hook(prev_hook);
 
     match panic {
@@ -430,7 +430,7 @@ where
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------
 
-#[cfg(test)]
+#[cfg(test)] #[cfg_attr(published_docs, doc(cfg(test)))]
 mod tests {
     use super::{CallError, CallErrors};
     use crate::meta::CallContext;
