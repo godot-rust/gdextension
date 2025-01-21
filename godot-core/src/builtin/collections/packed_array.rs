@@ -486,13 +486,12 @@ macro_rules! impl_packed_array {
         #[doc = concat!("Creates a `", stringify!($PackedArray), "` from an iterator.")]
         ///
         /// # Performance note
-        /// This uses the lower bound from `Iterator::size_hint()` to allocate memory up front. If
-        /// the iterator returns more than that number of elements, it falls back to reading
-        /// elements into a fixed-size buffer before adding them all efficiently as a batch.
+        /// This uses the lower bound from `Iterator::size_hint()` to allocate memory up front. If the iterator returns
+        /// more than that number of elements, it falls back to reading elements into a fixed-size buffer before adding
+        /// them all efficiently as a batch.
         ///
         /// # Panics
-        /// - If the iterator's `size_hint()` returns an incorrect lower bound (which is a breach
-        ///   of the `Iterator` protocol).
+        /// - If the iterator's `size_hint()` returns an incorrect lower bound (which is a breach of the `Iterator` protocol).
         impl FromIterator<$Element> for $PackedArray {
             fn from_iter<I: IntoIterator<Item = $Element>>(iter: I) -> Self {
                 let mut array = $PackedArray::default();
@@ -504,13 +503,12 @@ macro_rules! impl_packed_array {
         #[doc = concat!("Extends a`", stringify!($PackedArray), "` with the contents of an iterator.")]
         ///
         /// # Performance note
-        /// This uses the lower bound from `Iterator::size_hint()` to allocate memory up front. If
-        /// the iterator returns more than that number of elements, it falls back to reading
-        /// elements into a fixed-size buffer before adding them all efficiently as a batch.
+        /// This uses the lower bound from `Iterator::size_hint()` to allocate memory up front. If the iterator returns
+        /// more than that number of elements, it falls back to reading elements into a fixed-size buffer before adding
+        /// them all efficiently as a batch.
         ///
         /// # Panics
-        /// - If the iterator's `size_hint()` returns an incorrect lower bound (which is a breach
-        ///   of the `Iterator` protocol).
+        /// - If the iterator's `size_hint()` returns an incorrect lower bound (which is a breach of the `Iterator` protocol).
         impl Extend<$Element> for $PackedArray {
             fn extend<I: IntoIterator<Item = $Element>>(&mut self, iter: I) {
                 // Naive implementation:
@@ -527,10 +525,9 @@ macro_rules! impl_packed_array {
 
                 // Fast part.
                 //
-                // Use `Iterator::size_hint()` to pre-allocate the minimum number of elements in
-                // the iterator, then write directly to the resulting slice. We can do this because
-                // `size_hint()` is required by the `Iterator` contract to return correct bounds.
-                // Note that any bugs in it must not result in UB.
+                // Use `Iterator::size_hint()` to pre-allocate the minimum number of elements in the iterator, then
+                // write directly to the resulting slice. We can do this because `size_hint()` is required by the
+                // `Iterator` contract to return correct bounds. Note that any bugs in it must not result in UB.
                 //
                 // This takes 0.097 µs: 63× as fast as the naive approach.
                 let (size_hint_min, _size_hint_max) = iter.size_hint();
@@ -545,16 +542,15 @@ macro_rules! impl_packed_array {
 
                 // Slower part.
                 //
-                // While the iterator is still not finished, gather elements into a fixed-size
-                // buffer, then add them all at once.
+                // While the iterator is still not finished, gather elements into a fixed-size buffer, then add them all
+                // at once.
                 //
                 // This takes 0.14 µs: still 44× as fast as the naive approach.
                 //
-                // Note that we can't get by with simple memcpys, because `PackedStringArray`
-                // contains `GString`, which does not implement `Copy`.
+                // Note that we can't get by with simple memcpys, because `PackedStringArray` contains `GString`, which
+                // does not implement `Copy`.
                 //
-                // Buffer size: 2 kB is enough for the performance win, without needlessly blowing
-                // up the stack size.
+                // Buffer size: 2 kB is enough for the performance win, without needlessly blowing up the stack size.
                 const BUFFER_SIZE_BYTES: usize = 2048;
                 const BUFFER_CAPACITY: usize = const_max(
                     1,
@@ -576,13 +572,12 @@ macro_rules! impl_packed_array {
                     self.resize(capacity);
                     let out_slice = &mut self.as_mut_slice()[len..];
                     for i in 0..buf_len {
-                        // SAFETY: We called `write()` on items `0..buf_len`, so they are all
-                        // initialized.
+                        // SAFETY: We called `write()` on items `0..buf_len`, so they are all initialized.
                         let item = unsafe { buf[i].assume_init_read() };
                         out_slice[i] = item;
                     }
-                    // At this point, we have moved all initialized values out of the buffer, so
-                    // all of them are uninitialized again, and there are no leaks.
+                    // At this point, we have moved all initialized values out of the buffer, so all of them are
+                    // uninitialized again, and there are no leaks.
                 }
             }
         }
