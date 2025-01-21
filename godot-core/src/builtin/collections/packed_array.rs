@@ -381,17 +381,17 @@ macro_rules! impl_packed_array {
                 array
             }
 
-            /// Drops all elements in `self` and replaces them with data from an array of values.
+            /// Drops all elements in `self` starting from `dst` and replaces them with data from an array of values.
             ///
             /// # Safety
             ///
-            /// * Pointer must be valid slice of data with `len` size.
-            /// * Pointer must not point to `self` data.
-            /// * Length must be equal to `self.len()`.
+            /// * `src` must be valid slice of data with `len` size.
+            /// * `src` must not point to `self` data.
+            /// * `len` must be equal to `self.len() - dst`.
             /// * Source data must not be dropped later.
-            unsafe fn move_from_slice(&mut self, src: *const $Element, len: usize) {
-                let ptr = self.ptr_mut(0);
-                debug_assert_eq!(len, self.len(), "length precondition violated");
+            unsafe fn move_from_slice(&mut self, dst: usize, src: *const $Element, len: usize) {
+                let ptr = self.ptr_mut(dst);
+                debug_assert_eq!(len, self.len() - dst, "length precondition violated");
                 // Drops all elements in place. Drop impl must not panic.
                 ptr::drop_in_place(ptr::slice_from_raw_parts_mut(ptr, len));
                 // Copy is okay since all elements are dropped.
@@ -458,7 +458,7 @@ macro_rules! impl_packed_array {
 
                 // SAFETY: The packed array contains exactly N elements and the source array will be forgotten.
                 unsafe {
-                    packed_array.move_from_slice(arr.as_ptr(), N);
+                    packed_array.move_from_slice(0, arr.as_ptr(), N);
                 }
                 packed_array
             }
@@ -477,7 +477,7 @@ macro_rules! impl_packed_array {
                 // The vector is forcibly set to empty, so its contents are forgotten.
                 unsafe {
                     vec.set_len(0);
-                    array.move_from_slice(vec.as_ptr(), len);
+                    array.move_from_slice(0, vec.as_ptr(), len);
                 }
                 array
             }
@@ -566,14 +566,11 @@ macro_rules! impl_packed_array {
                     }
                     let capacity = len + buf_len;
                     self.resize(capacity);
-                    let out_slice = &mut self.as_mut_slice()[len..];
-                    for i in 0..buf_len {
-                        // SAFETY: We called `write()` on items `0..buf_len`, so they are all initialized.
-                        let item = unsafe { buf[i].assume_init_read() };
-                        out_slice[i] = item;
+                    // SAFETY: This drops the first `buf_len` items in the buffer, which are exactly those we initialized.
+                    // SAFETY: We just allocated `buf_len` new elements after index `len`.
+                    unsafe {
+                        self.move_from_slice(len, buf[0].as_ptr(), buf_len);
                     }
-                    // At this point, we have moved all initialized values out of the buffer, so all of them are
-                    // uninitialized again, and there are no leaks.
                 }
             }
         }
