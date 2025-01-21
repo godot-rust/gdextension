@@ -14,7 +14,7 @@ use godot_ffi as sys;
 use crate::builtin::*;
 use crate::meta::{AsArg, ToGodot};
 use std::mem::{size_of, MaybeUninit};
-use std::{fmt, ops, ptr};
+use std::{fmt, iter, ops, ptr};
 use sys::types::*;
 use sys::{ffi_methods, interface_fn, GodotFfi};
 
@@ -560,13 +560,9 @@ macro_rules! impl_packed_array {
                 while let Some(item) = iter.next() {
                     buf[0].write(item);
                     let mut buf_len = 1;
-                    while buf_len < BUFFER_CAPACITY {
-                        if let Some(item) = iter.next() {
-                            buf[buf_len].write(item);
-                            buf_len += 1;
-                        } else {
-                            break;
-                        }
+                    for (src, dst) in iter::zip(&mut iter, buf.iter_mut().skip(1)) {
+                        dst.write(src);
+                        buf_len += 1;
                     }
                     let capacity = len + buf_len;
                     self.resize(capacity);
