@@ -14,7 +14,7 @@ use godot_ffi as sys;
 use crate::builtin::*;
 use crate::meta::{AsArg, ToGodot};
 use std::mem::{size_of, MaybeUninit};
-use std::{fmt, iter, ops, ptr};
+use std::{fmt, ops, ptr};
 use sys::types::*;
 use sys::{ffi_methods, interface_fn, GodotFfi};
 
@@ -560,9 +560,15 @@ macro_rules! impl_packed_array {
                 while let Some(item) = iter.next() {
                     buf[0].write(item);
                     let mut buf_len = 1;
-                    for (src, dst) in iter::zip(&mut iter, buf.iter_mut().skip(1)) {
-                        dst.write(src);
-                        buf_len += 1;
+                    // We don't use `zip()` because we don't want to accidentally consume an extra element of `iter`.
+                    // This can be avoided even with `zip()` but it's clearer to make the control flow explicit.
+                    for out_ref in &mut buf[1..] {
+                        if let Some(item) = iter.next() {
+                            out_ref.write(item);
+                            buf_len += 1;
+                        } else {
+                            break;
+                        }
                     }
                     let capacity = len + buf_len;
                     self.resize(capacity);
@@ -571,6 +577,7 @@ macro_rules! impl_packed_array {
                     unsafe {
                         self.move_from_slice(len, buf[0].as_ptr(), buf_len);
                     }
+                    len += buf_len;
                 }
             }
         }

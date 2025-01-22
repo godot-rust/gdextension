@@ -276,45 +276,48 @@ fn packed_array_insert() {
     assert_eq!(array.to_vec(), vec![3, 1, 2, 4]);
 }
 
-#[itest]
-fn packed_array_extend_known_size() {
-    // The logic in `extend()` is not trivial, so we test it for a wide range of sizes.
-    for len_a in 0..32i32 {
-        for len_b in 0..32i32 {
+fn test_extend<F, I>(make_iter: F)
+where
+    F: Fn(i32) -> I,
+    I: Iterator<Item = i32>,
+{
+    // The logic in `extend()` is not trivial, so we test it for a wide range of sizes: powers of two, also plus and minus one.
+    // This includes zero. We go up to 2^12, which is 4096, because the internal buffer is currently 2048 bytes (512 `i32`s)
+    // and we want to be future-proof in case it's ever enlarged.
+    let lengths = (0..12i32)
+        .flat_map(|i| {
+            let b = 1 << i;
+            [b - 1, b, b + 1]
+        })
+        .collect::<Vec<_>>();
+    for &len_a in &lengths {
+        for &len_b in &lengths {
+            let iter = make_iter(len_b);
             let mut array = PackedInt32Array::from_iter(0..len_a);
-            array.extend(len_a..len_a + len_b);
-            assert_eq!(
-                array.to_vec(),
-                (0..len_a + len_b).collect::<Vec<_>>(),
-                "len_a = {len_a}, len_b = {len_b}",
-            );
+            array.extend(iter);
+            let expected = (0..len_a).chain(0..len_b).collect::<Vec<_>>();
+            assert_eq!(array.to_vec(), expected, "len_a = {len_a}, len_b = {len_b}",);
         }
     }
 }
 
 #[itest]
+fn packed_array_extend_known_size() {
+    // Create an iterator whose `size_hint()` returns `(len, Some(len))`.
+    test_extend(|len| 0..len);
+}
+
+#[itest]
 fn packed_array_extend_unknown_size() {
-    // The logic in `extend()` is not trivial, so we test it for a wide range of sizes.
-    for len_a in 0..32i32 {
-        for len_b in 0..32i32 {
-            let mut array = PackedInt32Array::from_iter(0..len_a);
-            let mut item = len_a;
-            array.extend(std::iter::from_fn(|| {
-                let result = if item < len_a + len_b {
-                    Some(item)
-                } else {
-                    None
-                };
-                item += 1;
-                result
-            }));
-            assert_eq!(
-                array.to_vec(),
-                (0..len_a + len_b).collect::<Vec<_>>(),
-                "len_a = {len_a}, len_b = {len_b}",
-            );
-        }
-    }
+    // Create an iterator whose `size_hint()` returns `(0, None)`.
+    test_extend(|len| {
+        let mut item = 0;
+        std::iter::from_fn(move || {
+            let result = if item < len { Some(item) } else { None };
+            item += 1;
+            result
+        })
+    });
 }
 
 #[itest]
