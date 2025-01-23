@@ -1186,7 +1186,7 @@ mod buffer {
 
     impl<T, const N: usize> Drop for Buffer<T, N> {
         fn drop(&mut self) {
-            assert!(self.len <= N);
+            debug_assert!(self.len <= N);
             if N > 0 {
                 // SAFETY: slice_from_raw_parts_mut by itself is not unsafe, but to make the resulting slice safe to use:
                 // self.buf[0] is a valid pointer, exactly self.len elements are initialized,
