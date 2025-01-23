@@ -13,7 +13,7 @@ use godot_ffi as sys;
 
 use crate::builtin::*;
 use crate::meta::{AsArg, ToGodot};
-use std::mem::{size_of, MaybeUninit};
+use std::mem::size_of;
 use std::{fmt, ops, ptr};
 use sys::types::*;
 use sys::{ffi_methods, interface_fn, GodotFfi};
@@ -556,29 +556,26 @@ macro_rules! impl_packed_array {
                     1,
                     BUFFER_SIZE_BYTES / size_of::<$Element>(),
                 );
-                let mut buf = Buffer::<BUFFER_CAPACITY, _>::default();
+                let mut buf = buffer::Buffer::<_, BUFFER_CAPACITY>::default();
                 while let Some(item) = iter.next() {
-                    buf.buf[0].write(item);
-                    buf.len += 1;
-                    // We don't use `zip()` because we don't want to accidentally consume an extra element of `iter`.
-                    // This can be avoided even with `zip()` but it's clearer to make the control flow explicit.
-                    for out_ref in &mut buf.buf[1..] {
+                    buf.push(item);
+                    while !buf.is_full() {
                         if let Some(item) = iter.next() {
-                            out_ref.write(item);
-                            buf.len += 1;
+                            buf.push(item);
                         } else {
                             break;
                         }
                     }
-                    let capacity = len + buf.len;
+                    let (buf_ptr, buf_len) = buf.drain_as_slice();
+                    let capacity = len + buf_len;
+                    // Assumption: resize does not panic. Otherwise we would leak memory here.
                     self.resize(capacity);
-                    // SAFETY: This drops the first `buf.len` items in the buffer, which are exactly those we initialized.
-                    // SAFETY: We just allocated `buf.len` new elements after index `len`.
+                    // SAFETY: This drops the first `buf_len` items in the buffer, which are exactly those we initialized.
+                    // SAFETY: We just allocated `buf_len` new elements after index `len`.
                     unsafe {
-                        self.move_from_slice(len, buf.buf[0].as_ptr(), buf.len);
+                        self.move_from_slice(len, buf_ptr, buf_len);
                     }
-                    len += buf.len;
-                    buf.len = 0;
+                    len = capacity;
                 }
             }
         }
@@ -1142,32 +1139,61 @@ impl PackedByteArray {
     }
 }
 
-/// A fixed-size buffer of `MaybeUninit` elements. The first `len` elements are initialized, the rest are not.
-/// Since this is used in only one place, we don't bother making it a safe abstraction for now:
-/// upholding this invariant is the caller's responsibility.
-struct Buffer<const N: usize, T> {
-    buf: [MaybeUninit<T>; N],
-    len: usize,
-}
+mod buffer {
+    use std::mem::MaybeUninit;
+    use std::ptr;
 
-impl<const N: usize, T> Default for Buffer<N, T> {
-    fn default() -> Self {
-        Self {
-            buf: [const { MaybeUninit::uninit() }; N],
-            len: 0,
+    /// A fixed-size buffer that does not do any allocations, and can hold up to `N` elements of type `T`.
+    pub struct Buffer<T, const N: usize> {
+        buf: [MaybeUninit<T>; N],
+        len: usize,
+    }
+
+    impl<T, const N: usize> Default for Buffer<T, N> {
+        fn default() -> Self {
+            Self {
+                buf: [const { MaybeUninit::uninit() }; N],
+                len: 0,
+            }
         }
     }
-}
 
-impl<const N: usize, T> Drop for Buffer<N, T> {
-    fn drop(&mut self) {
-        assert!(self.len <= N);
-        if N > 0 {
-            unsafe {
-                ptr::drop_in_place(ptr::slice_from_raw_parts_mut(
-                    self.buf[0].as_mut_ptr(),
-                    self.len,
-                ));
+    impl<T, const N: usize> Buffer<T, N> {
+        /// Appends the given value to the buffer.
+        ///
+        /// # Panics
+        /// If the buffer is full.
+        pub fn push(&mut self, value: T) {
+            self.buf[self.len].write(value);
+            self.len += 1;
+        }
+
+        pub fn is_full(&self) -> bool {
+            self.len == N
+        }
+
+        /// Returns a slice (as a pointer and length pair) of all initialized elements in the buffer,
+        /// and sets the length of the buffer to 0.
+        ///
+        /// It is the caller's responsibility to ensure that all elements in the slice get dropped.
+        /// This must be done before adding any new elements to the buffer.
+        pub fn drain_as_slice(&mut self) -> (*const T, usize) {
+            let len = self.len;
+            self.len = 0;
+            (self.buf[0].as_ptr(), len)
+        }
+    }
+
+    impl<T, const N: usize> Drop for Buffer<T, N> {
+        fn drop(&mut self) {
+            assert!(self.len <= N);
+            if N > 0 {
+                unsafe {
+                    ptr::drop_in_place(ptr::slice_from_raw_parts_mut(
+                        self.buf[0].as_mut_ptr(),
+                        self.len,
+                    ));
+                }
             }
         }
     }
