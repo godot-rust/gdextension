@@ -556,28 +556,29 @@ macro_rules! impl_packed_array {
                     1,
                     BUFFER_SIZE_BYTES / size_of::<$Element>(),
                 );
-                let mut buf = [const { MaybeUninit::<$Element>::uninit() }; BUFFER_CAPACITY];
+                let mut buf = Buffer::<BUFFER_CAPACITY, _>::default();
                 while let Some(item) = iter.next() {
-                    buf[0].write(item);
-                    let mut buf_len = 1;
+                    buf.buf[0].write(item);
+                    buf.len += 1;
                     // We don't use `zip()` because we don't want to accidentally consume an extra element of `iter`.
                     // This can be avoided even with `zip()` but it's clearer to make the control flow explicit.
-                    for out_ref in &mut buf[1..] {
+                    for out_ref in &mut buf.buf[1..] {
                         if let Some(item) = iter.next() {
                             out_ref.write(item);
-                            buf_len += 1;
+                            buf.len += 1;
                         } else {
                             break;
                         }
                     }
-                    let capacity = len + buf_len;
+                    let capacity = len + buf.len;
                     self.resize(capacity);
-                    // SAFETY: This drops the first `buf_len` items in the buffer, which are exactly those we initialized.
-                    // SAFETY: We just allocated `buf_len` new elements after index `len`.
+                    // SAFETY: This drops the first `buf.len` items in the buffer, which are exactly those we initialized.
+                    // SAFETY: We just allocated `buf.len` new elements after index `len`.
                     unsafe {
-                        self.move_from_slice(len, buf[0].as_ptr(), buf_len);
+                        self.move_from_slice(len, buf.buf[0].as_ptr(), buf.len);
                     }
-                    len += buf_len;
+                    len += buf.len;
+                    buf.len = 0;
                 }
             }
         }
@@ -1138,6 +1139,37 @@ impl PackedByteArray {
             .decompress_dynamic(max_output_size, compression_mode.ord() as i64);
 
         populated_or_err(decompressed)
+    }
+}
+
+/// A fixed-size buffer of `MaybeUninit` elements. The first `len` elements are initialized, the rest are not.
+/// Since this is used in only one place, we don't bother making it a safe abstraction for now:
+/// upholding this invariant is the caller's responsibility.
+struct Buffer<const N: usize, T> {
+    buf: [MaybeUninit<T>; N],
+    len: usize,
+}
+
+impl<const N: usize, T> Default for Buffer<N, T> {
+    fn default() -> Self {
+        Self {
+            buf: [const { MaybeUninit::uninit() }; N],
+            len: 0,
+        }
+    }
+}
+
+impl<const N: usize, T> Drop for Buffer<N, T> {
+    fn drop(&mut self) {
+        assert!(self.len <= N);
+        if N > 0 {
+            unsafe {
+                ptr::drop_in_place(ptr::slice_from_raw_parts_mut(
+                    self.buf[0].as_mut_ptr(),
+                    self.len,
+                ));
+            }
+        }
     }
 }
 
