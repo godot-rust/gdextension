@@ -1188,6 +1188,10 @@ mod buffer {
         fn drop(&mut self) {
             assert!(self.len <= N);
             if N > 0 {
+                // SAFETY: for slice_from_raw_parts_mut: self.buf[0] is a valid pointer, exactly self.len elements are initialized,
+                // and the pointer is not aliased since we have an exclusive &mut self.
+                // SAFETY: for drop_in_place: the value is valid because the slice_from_raw_parts_mut requirements are met,
+                // and there is no other way to access the value.
                 unsafe {
                     ptr::drop_in_place(ptr::slice_from_raw_parts_mut(
                         self.buf[0].as_mut_ptr(),
