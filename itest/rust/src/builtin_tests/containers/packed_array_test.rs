@@ -290,6 +290,7 @@ where
             [b - 1, b, b + 1]
         })
         .collect::<Vec<_>>();
+
     for &len_a in &lengths {
         for &len_b in &lengths {
             let iter = make_iter(len_b);

@@ -570,8 +570,8 @@ macro_rules! impl_packed_array {
                     let capacity = len + buf_len;
                     // Assumption: resize does not panic. Otherwise we would leak memory here.
                     self.resize(capacity);
-                    // SAFETY: This drops the first `buf_len` items in the buffer, which are exactly those we initialized.
-                    // SAFETY: We just allocated `buf_len` new elements after index `len`.
+                    // SAFETY: Dropping the first `buf_len` items is safe, because those are exactly the ones we initialized.
+                    // Writing output is safe because we just allocated `buf_len` new elements after index `len`.
                     unsafe {
                         self.move_from_slice(len, buf_ptr, buf_len);
                     }

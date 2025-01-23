@@ -95,11 +95,13 @@ fn utilities_ffi_call() -> f64 {
 
 #[bench(repeat = 25)]
 fn packed_array_from_iter_known_size() -> PackedInt32Array {
+    // Create an iterator whose `size_hint()` returns `(len, Some(len))`.
     PackedInt32Array::from_iter(0..100)
 }
 
 #[bench(repeat = 25)]
 fn packed_array_from_iter_unknown_size() -> PackedInt32Array {
+    // Create an iterator whose `size_hint()` returns `(0, None)`.
     let mut item = 0;
     PackedInt32Array::from_iter(std::iter::from_fn(|| {
         item += 1;
