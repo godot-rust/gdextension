@@ -591,7 +591,7 @@ pub mod cap {
         #[doc(hidden)]
         fn __virtual_call(
             name: &str,
-            #[cfg(since_api = "4.4")] hash: u32,
+            #[cfg(since_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.4")))] hash: u32,
         ) -> sys::GDExtensionClassCallVirtual;
     }
 }

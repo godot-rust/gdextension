@@ -22,7 +22,7 @@ use sys::conv::u32_to_usize;
 use sys::interface_fn;
 
 // Creation callback has `p_notify_postinitialize` parameter since 4.4: https://github.com/godotengine/godot/pull/91018.
-#[cfg(since_api = "4.4")]
+#[cfg(since_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.4")))]
 pub unsafe extern "C" fn create<T: cap::GodotDefault>(
     _class_userdata: *mut std::ffi::c_void,
     _notify_postinitialize: sys::GDExtensionBool,
@@ -30,14 +30,14 @@ pub unsafe extern "C" fn create<T: cap::GodotDefault>(
     create_custom(T::__godot_user_init)
 }
 
-#[cfg(before_api = "4.4")]
+#[cfg(before_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.4")))]
 pub unsafe extern "C" fn create<T: cap::GodotDefault>(
     _class_userdata: *mut std::ffi::c_void,
 ) -> sys::GDExtensionObjectPtr {
     create_custom(T::__godot_user_init)
 }
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 pub unsafe extern "C" fn recreate<T: cap::GodotDefault>(
     _class_userdata: *mut std::ffi::c_void,
     object: sys::GDExtensionObjectPtr,
@@ -111,7 +111,7 @@ pub unsafe extern "C" fn free<T: GodotClass>(
     crate::storage::destroy_storage::<T>(instance);
 }
 
-#[cfg(since_api = "4.4")]
+#[cfg(since_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.4")))]
 pub unsafe extern "C" fn get_virtual<T: cap::ImplementsGodotVirtual>(
     _class_user_data: *mut std::ffi::c_void,
     name: sys::GDExtensionConstStringNamePtr,
@@ -124,7 +124,7 @@ pub unsafe extern "C" fn get_virtual<T: cap::ImplementsGodotVirtual>(
     T::__virtual_call(method_name.as_str(), hash)
 }
 
-#[cfg(before_api = "4.4")]
+#[cfg(before_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.4")))]
 pub unsafe extern "C" fn get_virtual<T: cap::ImplementsGodotVirtual>(
     _class_user_data: *mut std::ffi::c_void,
     name: sys::GDExtensionConstStringNamePtr,
@@ -136,7 +136,7 @@ pub unsafe extern "C" fn get_virtual<T: cap::ImplementsGodotVirtual>(
     T::__virtual_call(method_name.as_str())
 }
 
-#[cfg(since_api = "4.4")]
+#[cfg(since_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.4")))]
 pub unsafe extern "C" fn default_get_virtual<T: UserClass>(
     _class_user_data: *mut std::ffi::c_void,
     name: sys::GDExtensionConstStringNamePtr,
@@ -149,7 +149,7 @@ pub unsafe extern "C" fn default_get_virtual<T: UserClass>(
     T::__default_virtual_call(method_name.as_str(), hash)
 }
 
-#[cfg(before_api = "4.4")]
+#[cfg(before_api = "4.4")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.4")))]
 pub unsafe extern "C" fn default_get_virtual<T: UserClass>(
     _class_user_data: *mut std::ffi::c_void,
     name: sys::GDExtensionConstStringNamePtr,
@@ -177,7 +177,7 @@ pub unsafe extern "C" fn to_string<T: cap::GodotToString>(
     string.move_into_string_ptr(out_string);
 }
 
-#[cfg(before_api = "4.2")]
+#[cfg(before_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(before_api = "4.2")))]
 pub unsafe extern "C" fn on_notification<T: cap::GodotNotification>(
     instance: sys::GDExtensionClassInstancePtr,
     what: i32,
@@ -188,7 +188,7 @@ pub unsafe extern "C" fn on_notification<T: cap::GodotNotification>(
     T::__godot_notification(&mut *instance, what);
 }
 
-#[cfg(since_api = "4.2")]
+#[cfg(since_api = "4.2")] #[cfg_attr(published_docs, doc(cfg(since_api = "4.2")))]
 pub unsafe extern "C" fn on_notification<T: cap::GodotNotification>(
     instance: sys::GDExtensionClassInstancePtr,
     what: i32,
