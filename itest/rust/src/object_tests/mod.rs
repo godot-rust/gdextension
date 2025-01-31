@@ -23,6 +23,7 @@ mod property_template_test;
 mod property_test;
 mod reentrant_test;
 mod singleton_test;
+mod validate_property_test;
 mod virtual_methods_test;
 
 // Need to test this in the init level method.
