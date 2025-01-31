@@ -136,6 +136,27 @@ fn callable_static() {
 
     #[cfg(since_api = "4.3")]
     assert_eq!(callable.get_argument_count(), 0); // Consistently doesn't work :)
+
+
+    // TODO: does this following section need to be wrapped in a `cfg!(since_api "4.4")`?
+    // If so, how do I test it?
+
+    // Create a bind with some filled parameters
+    // Within Godot, binded arguments are used in-order AFTER call arguments
+    let bind = callable.bind(&[
+        "two".to_variant(),
+        array![&NodePath::from("three/four")].to_variant(),
+        RefCounted::new_gd().to_variant(),
+    ]);    
+    assert!(!Variant::is_nil(&bind.to_variant())); // Binded callable should still exist
+
+    // Call, filling in the first argument
+    let bind_result = bind.call(&[1.to_variant()]);
+    assert!(!Variant::is_nil(&bind_result)); // Ensure result also exists (FAILS HERE)
+
+    // Ensure result contains data
+    let bind_result_data: VariantArray = bind_result.to();
+    assert_eq!(4, bind_result_data.len());
 }
 
 #[itest]
