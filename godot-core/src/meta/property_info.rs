@@ -10,6 +10,7 @@ use crate::global::{PropertyHint, PropertyUsageFlags};
 use crate::meta::{
     element_godot_type_name, ArrayElement, ClassName, GodotType, PackedArrayElement,
 };
+use crate::obj::{EngineBitfield, EngineEnum};
 use crate::registry::property::{Export, Var};
 use crate::sys;
 use godot_ffi::VariantType;
@@ -176,6 +177,54 @@ impl PropertyInfo {
             hint: u32::try_from(self.hint_info.hint.ord()).expect("hint.ord()"),
             hint_string: self.hint_info.hint_string.into_owned_string_sys(),
             usage: u32::try_from(self.usage.ord()).expect("usage.ord()"),
+        }
+    }
+
+    /// Consumes self, moving the values into `sys::GDExtensionPropertyInfo` pointer.
+    ///
+    /// # Safety
+    ///
+    /// * `property_info_ptr` must be valid.
+    pub(crate) unsafe fn move_into_property_info_ptr(
+        self,
+        property_info_ptr: *mut sys::GDExtensionPropertyInfo,
+    ) {
+        (*property_info_ptr).type_ = self.variant_type.sys();
+        (*property_info_ptr).hint = u32::try_from(self.hint_info.hint.ord()).expect("hint.ord()");
+
+        self.hint_info
+            .hint_string
+            .move_into_string_ptr((*property_info_ptr).hint_string);
+        self.property_name
+            .move_into_string_ptr((*property_info_ptr).name);
+
+        (*property_info_ptr).usage = u32::try_from(self.usage.ord()).expect("usage.ord()");
+
+        if self.class_name != ClassName::none() {
+            (*property_info_ptr).class_name = sys::SysPtr::force_mut(self.class_name.string_sys());
+        }
+    }
+
+    /// Creates copy of given `sys::GDExtensionPropertyInfo`.
+    ///
+    /// # Safety
+    ///
+    /// * `property_info_ptr` must be valid.
+    pub(crate) unsafe fn new_from_sys(
+        property_info_ptr: *mut sys::GDExtensionPropertyInfo,
+    ) -> Self {
+        let variant_type = VariantType::from_sys((*property_info_ptr).type_);
+        let property_name = StringName::new_from_string_sys((*property_info_ptr).name);
+        let hint_string = GString::new_from_string_sys((*property_info_ptr).hint_string);
+        let hint = PropertyHint::from_ord((*property_info_ptr).hint.to_owned() as i32);
+        let usage = PropertyUsageFlags::from_ord((*property_info_ptr).usage as u64);
+
+        Self {
+            variant_type,
+            class_name: ClassName::none(),
+            property_name,
+            hint_info: PropertyHintInfo { hint, hint_string },
+            usage,
         }
     }
 

@@ -143,6 +143,17 @@ impl StringName {
         *boxed
     }
 
+    /// Moves this string into a string name sys pointer. This is the same as using [`GodotFfi::move_return_ptr`].
+    ///
+    /// # Safety
+    ///
+    /// `dst` must be a valid string name pointer.
+    pub(crate) unsafe fn move_into_string_ptr(self, dst: sys::GDExtensionStringNamePtr) {
+        let dst: sys::GDExtensionTypePtr = dst.cast();
+
+        self.move_return_ptr(dst, sys::PtrcallType::Standard);
+    }
+
     /// Convert a `StringName` sys pointer to a reference with unbounded lifetime.
     ///
     /// # Safety
