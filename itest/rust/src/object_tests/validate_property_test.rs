@@ -40,24 +40,24 @@ fn validate_property_test() {
     let properties: Array<Dictionary> = obj.get_property_list();
 
     for property in properties.iter_shared() {
-        if property
+        if !property
             .get("name")
-            .map(|v| v.to_string() == "SuperNewTestPropertyName")
-            .unwrap_or(false)
+            .is_some_and(|v| v.to_string() == "SuperNewTestPropertyName")
         {
-            let Some(usage) = property.get("usage").map(|v| v.to::<PropertyUsageFlags>()) else {
-                continue;
-            };
-            assert_eq!(usage, PropertyUsageFlags::NO_EDITOR);
-
-            let Some(usage) = property.get("hint_string").map(|v| v.to::<GString>()) else {
-                continue;
-            };
-            assert_eq!(usage, GString::from("SomePropertyHint"));
-
-            obj.free();
-            return;
+            continue;
         }
+        let Some(usage) = property.get("usage").map(|v| v.to::<PropertyUsageFlags>()) else {
+            continue;
+        };
+        assert_eq!(usage, PropertyUsageFlags::NO_EDITOR);
+
+        let Some(usage) = property.get("hint_string").map(|v| v.to::<GString>()) else {
+            continue;
+        };
+        assert_eq!(usage, GString::from("SomePropertyHint"));
+
+        obj.free();
+        return;
     }
 
     obj.free();

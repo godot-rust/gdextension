@@ -479,6 +479,7 @@ fn fill_class_info(item: PluginItem, c: &mut ClassRegistrationInfo) {
             c.godot_params.property_can_revert_func = user_property_can_revert_fn;
             c.godot_params.property_get_revert_func = user_property_get_revert_fn;
             c.user_virtual_fn = get_virtual_fn;
+
             // Not present in GdExtension
             #[cfg(since_api = "4.2")]
             {

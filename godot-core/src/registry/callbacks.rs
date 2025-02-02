@@ -375,7 +375,8 @@ pub unsafe extern "C" fn validate_property<T: cap::GodotValidateProperty>(
 
     let mut property_info = unsafe { PropertyInfo::new_from_sys(property_info_ptr) };
     T::__godot_validate_property(&*instance, &mut property_info);
-    // SAFETY: property_info_ptr is still valid
+
+    // SAFETY: property_info_ptr is still valid.
     unsafe { property_info.move_into_property_info_ptr(property_info_ptr) };
 
     sys::conv::SYS_TRUE

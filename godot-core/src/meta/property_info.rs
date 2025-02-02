@@ -189,20 +189,17 @@ impl PropertyInfo {
         self,
         property_info_ptr: *mut sys::GDExtensionPropertyInfo,
     ) {
-        (*property_info_ptr).type_ = self.variant_type.sys();
-        (*property_info_ptr).hint = u32::try_from(self.hint_info.hint.ord()).expect("hint.ord()");
+        let class_name = if self.class_name == ClassName::none() {
+            (*property_info_ptr).class_name
+        } else {
+            sys::SysPtr::force_mut(self.class_name.string_sys())
+        };
+        property_info_ptr.write(self.property_sys());
+        (*property_info_ptr).class_name.write(*class_name);
 
-        self.hint_info
-            .hint_string
-            .move_into_string_ptr((*property_info_ptr).hint_string);
-        self.property_name
-            .move_into_string_ptr((*property_info_ptr).name);
-
-        (*property_info_ptr).usage = u32::try_from(self.usage.ord()).expect("usage.ord()");
-
-        if self.class_name != ClassName::none() {
-            (*property_info_ptr).class_name = sys::SysPtr::force_mut(self.class_name.string_sys());
-        }
+        // Decreasing the refcount on refcounted types (such as StringName or GString)
+        // is a responsibility of the `property_info_ptr`'s owner.
+        std::mem::forget(self);
     }
 
     /// Creates copy of given `sys::GDExtensionPropertyInfo`.
@@ -213,18 +210,15 @@ impl PropertyInfo {
     pub(crate) unsafe fn new_from_sys(
         property_info_ptr: *mut sys::GDExtensionPropertyInfo,
     ) -> Self {
-        let variant_type = VariantType::from_sys((*property_info_ptr).type_);
-        let property_name = StringName::new_from_string_sys((*property_info_ptr).name);
-        let hint_string = GString::new_from_string_sys((*property_info_ptr).hint_string);
-        let hint = PropertyHint::from_ord((*property_info_ptr).hint.to_owned() as i32);
-        let usage = PropertyUsageFlags::from_ord((*property_info_ptr).usage as u64);
-
         Self {
-            variant_type,
+            variant_type: VariantType::from_sys((*property_info_ptr).type_),
             class_name: ClassName::none(),
-            property_name,
-            hint_info: PropertyHintInfo { hint, hint_string },
-            usage,
+            property_name: StringName::new_from_string_sys((*property_info_ptr).name),
+            hint_info: PropertyHintInfo {
+                hint: PropertyHint::from_ord((*property_info_ptr).hint.to_owned() as i32),
+                hint_string: GString::new_from_string_sys((*property_info_ptr).hint_string),
+            },
+            usage: PropertyUsageFlags::from_ord((*property_info_ptr).usage as u64),
         }
     }
 
