@@ -119,6 +119,11 @@ fn make_special_virtual_methods(notification_enum_name: &Ident) -> TokenStream {
             unimplemented!()
         }
 
+        #[cfg(since_api = "4.2")]
+        fn validate_property(&self, property: &mut crate::meta::PropertyInfo) {
+            unimplemented!()
+        }
+
         /// Called by Godot to tell if a property has a custom revert or not.
         ///
         /// Return `None` for no custom revert, and return `Some(value)` to specify the custom revert.

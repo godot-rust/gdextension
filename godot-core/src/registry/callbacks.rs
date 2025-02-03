@@ -13,6 +13,7 @@
 use crate::builder::ClassBuilder;
 use crate::builtin::{StringName, Variant};
 use crate::classes::Object;
+use crate::meta::PropertyInfo;
 use crate::obj::{bounds, cap, AsDyn, Base, Bounds, Gd, GodotClass, Inherits, UserClass};
 use crate::registry::plugin::ErasedDynGd;
 use crate::storage::{as_storage, InstanceStorage, Storage, StorageRefCounted};
@@ -354,6 +355,29 @@ pub unsafe extern "C" fn property_get_revert<T: cap::GodotPropertyGetRevert>(
     unsafe {
         revert.move_into_var_ptr(ret);
     }
+
+    sys::conv::SYS_TRUE
+}
+
+/// # Safety
+///
+/// - Must only be called by Godot as a callback for `validate_property` for a rust-defined class of type `T`.
+/// - `sys_property_info` must be valid for the whole duration of this function call (ie - can't be freed nor consumed).
+#[deny(unsafe_op_in_unsafe_fn)]
+#[cfg(since_api = "4.2")]
+pub unsafe extern "C" fn validate_property<T: cap::GodotValidateProperty>(
+    instance: sys::GDExtensionClassInstancePtr,
+    property_info_ptr: *mut sys::GDExtensionPropertyInfo,
+) -> sys::GDExtensionBool {
+    // SAFETY: `instance` is a valid `T` instance pointer for the duration of this function call.
+    let storage = unsafe { as_storage::<T>(instance) };
+    let instance = storage.get();
+
+    let mut property_info = unsafe { PropertyInfo::new_from_sys(property_info_ptr) };
+    T::__godot_validate_property(&*instance, &mut property_info);
+
+    // SAFETY: property_info_ptr is still valid.
+    unsafe { property_info.move_into_property_info_ptr(property_info_ptr) };
 
     sys::conv::SYS_TRUE
 }
