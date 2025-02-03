@@ -11,6 +11,7 @@
 
 use godot_ffi as sys;
 
+use crate::builtin::collections::extend_buffer::ExtendBuffer;
 use crate::builtin::*;
 use crate::meta::{AsArg, ToGodot};
 use std::mem::size_of;
@@ -382,6 +383,7 @@ macro_rules! impl_packed_array {
             }
 
             /// Drops all elements in `self` starting from `dst` and replaces them with data from an array of values.
+            /// `dst` must be a valid index, even if `len` is zero.
             ///
             /// # Safety
             ///
@@ -511,13 +513,27 @@ macro_rules! impl_packed_array {
         /// - If the iterator's `size_hint()` returns an incorrect lower bound (which is a breach of the `Iterator` protocol).
         impl Extend<$Element> for $PackedArray {
             fn extend<I: IntoIterator<Item = $Element>>(&mut self, iter: I) {
-                // Naive implementation:
+                // This function is complicated, but with good reason. The problem is that we don't know the length of
+                // the `Iterator` ahead of time; all we get is its `size_hint()`.
                 //
-                //     for item in iter.into_iter() {
-                //         self.push(meta::ParamType::owned_to_arg(item));
-                //     }
+                // There are at least two categories of iterators that are common in the wild, for which we'd want good performance:
                 //
-                // This takes 6.1 µs for 1000 i32 elements in release mode.
+                // 1. The length is known: `size_hint()` returns the exact size, e.g. just iterating over a `Vec` or `BTreeSet`.
+                // 2. The length is unknown: `size_hint()` returns 0, e.g. `Filter`, `FlatMap`, `FromFn`.
+                //
+                // A number of implementations are possible, which were benchmarked for 1000 elements of type `i32`:
+                //
+                // - Simply call `push()` in a loop:
+                //   6.1 µs whether or not the length is known.
+                // - First `collect()` the `Iterator` into a `Vec`, call `self.resize()` to make room, then move out of the `Vec`:
+                //   0.78 µs if the length is known, 1.62 µs if the length is unknown.
+                //   It also requires additional temporary memory to hold all elements.
+                // - The strategy implemented below:
+                //   0.097 µs if the length is known, 0.49 µs if the length is unknown.
+                //
+                // The implementation of `Vec` in the standard library deals with this by repeatedly `reserve()`ing
+                // whatever `size_hint()` returned, but we don't want to do that because the Godot API call to
+                // `self.resize()` is relatively slow.
 
                 let mut iter = iter.into_iter();
                 // Cache the length to avoid repeated Godot API calls.
@@ -528,8 +544,6 @@ macro_rules! impl_packed_array {
                 // Use `Iterator::size_hint()` to pre-allocate the minimum number of elements in the iterator, then
                 // write directly to the resulting slice. We can do this because `size_hint()` is required by the
                 // `Iterator` contract to return correct bounds. Note that any bugs in it must not result in UB.
-                //
-                // This takes 0.097 µs: 63× as fast as the naive approach.
                 let (size_hint_min, _size_hint_max) = iter.size_hint();
                 if size_hint_min > 0 {
                     let capacity = len + size_hint_min;
@@ -545,18 +559,23 @@ macro_rules! impl_packed_array {
                 // While the iterator is still not finished, gather elements into a fixed-size buffer, then add them all
                 // at once.
                 //
-                // This takes 0.14 µs: still 44× as fast as the naive approach.
+                // Why not call `self.resize()` with fixed-size increments, like 32 elements at a time? Well, we might
+                // end up over-allocating, and then need to trim the array length back at the end. Because Godot
+                // allocates memory in steps of powers of two, this might end up with an array backing storage that is
+                // twice as large as it needs to be. By first gathering elements into a buffer, we can tell Godot to
+                // allocate exactly as much as we need, and no more.
                 //
                 // Note that we can't get by with simple memcpys, because `PackedStringArray` contains `GString`, which
                 // does not implement `Copy`.
                 //
                 // Buffer size: 2 kB is enough for the performance win, without needlessly blowing up the stack size.
+                // (A cursory check shows that most/all platforms use a stack size of at least 1 MB.)
                 const BUFFER_SIZE_BYTES: usize = 2048;
                 const BUFFER_CAPACITY: usize = const_max(
                     1,
                     BUFFER_SIZE_BYTES / size_of::<$Element>(),
                 );
-                let mut buf = buffer::Buffer::<_, BUFFER_CAPACITY>::default();
+                let mut buf = ExtendBuffer::<_, BUFFER_CAPACITY>::default();
                 while let Some(item) = iter.next() {
                     buf.push(item);
                     while !buf.is_full() {
@@ -566,14 +585,14 @@ macro_rules! impl_packed_array {
                             break;
                         }
                     }
-                    let (buf_ptr, buf_len) = buf.drain_as_slice();
-                    let capacity = len + buf_len;
+                    let buf_slice = buf.drain_as_mut_slice();
+                    let capacity = len + buf_slice.len();
                     // Assumption: resize does not panic. Otherwise we would leak memory here.
                     self.resize(capacity);
-                    // SAFETY: Dropping the first `buf_len` items is safe, because those are exactly the ones we initialized.
-                    // Writing output is safe because we just allocated `buf_len` new elements after index `len`.
+                    // SAFETY: Dropping the first `buf_slice.len()` items is safe, because those are exactly the ones we initialized.
+                    // Writing output is safe because we just allocated `buf_slice.len()` new elements after index `len`.
                     unsafe {
-                        self.move_from_slice(len, buf_ptr, buf_len);
+                        self.move_from_slice(len, buf_slice.as_ptr(), buf_slice.len());
                     }
                     len = capacity;
                 }
@@ -1136,69 +1155,6 @@ impl PackedByteArray {
             .decompress_dynamic(max_output_size, compression_mode.ord() as i64);
 
         populated_or_err(decompressed)
-    }
-}
-
-mod buffer {
-    use std::mem::MaybeUninit;
-    use std::ptr;
-
-    /// A fixed-size buffer that does not do any allocations, and can hold up to `N` elements of type `T`.
-    pub struct Buffer<T, const N: usize> {
-        buf: [MaybeUninit<T>; N],
-        len: usize,
-    }
-
-    impl<T, const N: usize> Default for Buffer<T, N> {
-        fn default() -> Self {
-            Self {
-                buf: [const { MaybeUninit::uninit() }; N],
-                len: 0,
-            }
-        }
-    }
-
-    impl<T, const N: usize> Buffer<T, N> {
-        /// Appends the given value to the buffer.
-        ///
-        /// # Panics
-        /// If the buffer is full.
-        pub fn push(&mut self, value: T) {
-            self.buf[self.len].write(value);
-            self.len += 1;
-        }
-
-        pub fn is_full(&self) -> bool {
-            self.len == N
-        }
-
-        /// Returns a slice (as a pointer and length pair) of all initialized elements in the buffer,
-        /// and sets the length of the buffer to 0.
-        ///
-        /// It is the caller's responsibility to ensure that all elements in the slice get dropped.
-        /// This must be done before adding any new elements to the buffer.
-        pub fn drain_as_slice(&mut self) -> (*const T, usize) {
-            let len = self.len;
-            self.len = 0;
-            (self.buf[0].as_ptr(), len)
-        }
-    }
-
-    impl<T, const N: usize> Drop for Buffer<T, N> {
-        fn drop(&mut self) {
-            debug_assert!(self.len <= N);
-            if N > 0 {
-                // SAFETY: slice_from_raw_parts_mut by itself is not unsafe, but to make the resulting slice safe to use:
-                // self.buf[0] is a valid pointer, exactly self.len elements are initialized,
-                // and the pointer is not aliased since we have an exclusive &mut self.
-                let slice = ptr::slice_from_raw_parts_mut(self.buf[0].as_mut_ptr(), self.len);
-                // SAFETY: the value is valid because the slice_from_raw_parts_mut requirements are met,
-                // and there is no other way to access the value.
-                unsafe {
-                    ptr::drop_in_place(slice);
-                }
-            }
-        }
     }
 }
 
