@@ -45,7 +45,7 @@ pub unsafe fn __gdext_load_library<E: ExtensionLibrary>(
         unsafe {
             sys::initialize(get_proc_address, library, config);
         }
-        
+
         crate::private::set_gdext_hook(
             #[cfg(feature = "experimental-threads")]
             || true,
@@ -53,7 +53,7 @@ pub unsafe fn __gdext_load_library<E: ExtensionLibrary>(
             {
                 let main_thread = std::thread::current().id();
                 move || std::thread::current().id() == main_thread
-            }
+            },
         );
 
         // Currently no way to express failure; could be exposed to E if necessary.
