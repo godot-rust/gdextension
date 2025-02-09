@@ -16,6 +16,7 @@ use godot::sys;
 use godot::sys::Global;
 use std::cell::Cell;
 use std::rc::Rc;
+use std::sync::{Arc, Mutex};
 
 #[itest]
 fn signal_basic_connect_emit() {
@@ -80,14 +81,16 @@ fn signal_symbols_internal() {
 #[itest]
 fn signal_symbols_external() {
     let emitter = Emitter::new_alloc();
+    let mut sig = emitter.signals().emitter_1();
 
     // Local function; deliberately use a !Send type.
     let tracker = Rc::new(Cell::new(0));
-    let tracker_copy = tracker.clone();
-    let mut sig = emitter.signals().emitter_1();
-    sig.connect(move |i| {
-        tracker_copy.set(i);
-    });
+    {
+        let tracker = tracker.clone();
+        sig.connect(move |i| {
+            tracker.set(i);
+        });
+    }
 
     // Self-modifying method.
     sig.connect_self(Emitter::self_receive);
@@ -95,6 +98,25 @@ fn signal_symbols_external() {
     // Connect to other object.
     let receiver = Receiver::new_alloc();
     sig.connect_obj(&receiver, Receiver::receiver_1_mut);
+
+    let local_tracker = Rc::new(Cell::new(0));
+    {
+        let local_tracker = local_tracker.clone();
+        let mut sig = emitter.signals().emitter_1();
+        sig.connect_builder()
+            .function(move |i| local_tracker.set(i))
+            .done();
+    }
+
+    let sync_tracker = Arc::new(Mutex::new(0));
+    {
+        let mut sig = emitter.signals().emitter_1();
+        let sync_tracker = sync_tracker.clone();
+        sig.connect_builder()
+            .function(move |i| *sync_tracker.lock().unwrap() = i)
+            .sync()
+            .done();
+    }
 
     // Emit signal.
     sig.emit(987);
@@ -109,6 +131,14 @@ fn signal_symbols_external() {
     assert!(
         receiver.bind().used[1].get(),
         "Emit failed (other object method)"
+    );
+
+    // Check that closures set up with builder are invoked.
+    assert_eq!(local_tracker.get(), 987, "Emit failed (builder local)");
+    assert_eq!(
+        *sync_tracker.lock().unwrap(),
+        987,
+        "Emit failed (builder sync)"
     );
 
     receiver.free();
@@ -162,7 +192,10 @@ impl Emitter {
 
     #[func]
     fn self_receive(&mut self, arg1: i64) {
-        self.last_received = arg1;
+        #[cfg(since_api = "4.2")]
+        {
+            self.last_received = arg1;
+        }
     }
 
     #[func]
